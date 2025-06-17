@@ -10,40 +10,56 @@ export const parseContacts = (text: string): Contact[] => {
   const lines = text.split('\n').filter(line => line.trim() !== '');
   
   // Regex para detectar telefones no formato brasileiro
-  const phoneRegex = /(\(?(?:0?11|0?[12-9][0-9])\)?[-.\s]?(?:9?\d{4}[-.\s]?\d{4}|\d{4}[-.\s]?\d{4}))/g;
+  const phoneRegex = /\((\d{2})\)\s*(\d{4,5})-?(\d{4})/g;
   
-  // Regex para formato WhatsApp específico: (XX) XXXXX-XXXX ou (XX) XXXX-XXXX
-  const whatsappRegex = /\((\d{2})\)\s?(\d{4,5})-?(\d{4})/g;
-  
-  let currentContact: Partial<Contact> = {};
+  console.log('Linhas do texto:', lines);
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     
-    // Pular linhas muito curtas ou que são apenas números/avaliações
-    if (line.length < 3 || /^[\d.,\s★⭐]+$/.test(line)) {
+    // Pular linhas vazias, muito curtas, ou que são claramente metadados
+    if (line.length < 3 || 
+        /^(Instalar|Resultados|Compartilhar|Em estoque|Retirada|Entrega|Serviços|Aulas)/.test(line) ||
+        /^(Fechado|Fecha|Aberto|Abre)/.test(line) ||
+        /^[\d.,\s★⭐"]+$/.test(line) ||
+        line.startsWith('"') ||
+        /^Loja de/.test(line) ||
+        /^R\.|^Av\./.test(line)) {
       continue;
     }
     
-    // Detectar telefones na linha
-    const phoneMatches = line.match(phoneRegex);
+    console.log('Processando linha:', line);
     
-    if (phoneMatches) {
-      // Se encontrou telefone, a linha anterior ou atual deve conter o nome da empresa
+    // Verificar se a linha contém telefone
+    const phoneMatches = [...line.matchAll(phoneRegex)];
+    
+    if (phoneMatches.length > 0) {
+      // Se encontrou telefone na linha atual, procurar o nome da empresa nas linhas anteriores
       let businessName = '';
       
-      // Tentar extrair nome da empresa da mesma linha (removendo o telefone)
-      businessName = line.replace(phoneRegex, '').trim();
-      
-      // Se não há nome na linha atual, procurar nas linhas anteriores
-      if (!businessName || businessName.length < 3) {
-        for (let j = Math.max(0, i - 3); j < i; j++) {
-          const prevLine = lines[j].trim();
-          if (prevLine && prevLine.length > 3 && !phoneRegex.test(prevLine) && !/^[\d.,\s★⭐]+$/.test(prevLine)) {
-            businessName = prevLine;
-            break;
-          }
+      // Procurar o nome da empresa nas últimas 5 linhas anteriores
+      for (let j = Math.max(0, i - 5); j < i; j++) {
+        const prevLine = lines[j].trim();
+        
+        // Verificar se a linha anterior pode ser um nome de empresa
+        if (prevLine && 
+            prevLine.length > 5 && 
+            !phoneRegex.test(prevLine) && 
+            !/^[\d.,\s★⭐]+$/.test(prevLine) &&
+            !prevLine.startsWith('"') &&
+            !/^(Fechado|Fecha|Aberto|Abre|Loja de|R\.|Av\.)/.test(prevLine) &&
+            !/^(Em estoque|Retirada|Entrega|Serviços|Aulas)/.test(prevLine)) {
+          
+          businessName = prevLine;
+          break;
         }
+      }
+      
+      // Se não encontrou nas linhas anteriores, tentar extrair da linha atual
+      if (!businessName) {
+        businessName = line.replace(phoneRegex, '').trim();
+        // Remover informações extras que podem vir junto
+        businessName = businessName.replace(/\s*·.*$/, '').trim();
       }
       
       // Limpar o nome da empresa
@@ -52,13 +68,21 @@ export const parseContacts = (text: string): Contact[] => {
         .replace(/\s+/g, ' ') // Normaliza espaços
         .replace(/[★⭐]\s*[\d.,]+.*$/, '') // Remove avaliações
         .replace(/\s*-\s*.*$/, '') // Remove descrições após hífen
+        .replace(/\s*·.*$/, '') // Remove informações após ·
         .trim();
       
+      console.log('Nome da empresa encontrado:', businessName);
+      
       if (businessName && businessName.length > 2) {
-        phoneMatches.forEach(phone => {
-          const cleanPhone = phone.replace(/[\s\-\(\)\.]/g, '');
-          const formattedPhone = formatPhone(phone);
-          const isWhatsApp = isWhatsAppNumber(phone);
+        phoneMatches.forEach(match => {
+          const fullPhone = match[0];
+          const ddd = match[1];
+          const number = match[2] + match[3];
+          
+          const formattedPhone = `(${ddd}) ${match[2]}-${match[3]}`;
+          const isWhatsApp = isWhatsAppNumber(fullPhone);
+          
+          console.log('Contato adicionado:', { businessName, formattedPhone, isWhatsApp });
           
           contacts.push({
             name: businessName,
@@ -75,23 +99,8 @@ export const parseContacts = (text: string): Contact[] => {
     index === self.findIndex(c => c.name === contact.name && c.phone === contact.phone)
   );
   
+  console.log('Contatos únicos extraídos:', uniqueContacts);
   return uniqueContacts;
-};
-
-const formatPhone = (phone: string): string => {
-  // Remove todos os caracteres não numéricos
-  const numbers = phone.replace(/\D/g, '');
-  
-  // Se tem 11 dígitos (com DDD)
-  if (numbers.length === 11) {
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7)}`;
-  }
-  // Se tem 10 dígitos (com DDD)
-  else if (numbers.length === 10) {
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6)}`;
-  }
-  // Retorna o telefone original se não conseguir formatar
-  return phone;
 };
 
 const isWhatsAppNumber = (phone: string): boolean => {
