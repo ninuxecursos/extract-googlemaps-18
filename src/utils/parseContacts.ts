@@ -75,12 +75,21 @@ export const parseContacts = (text: string): Contact[] => {
       
       if (businessName && businessName.length > 2) {
         phoneMatches.forEach(match => {
-          const fullPhone = match[0];
           const ddd = match[1];
-          const number = match[2] + match[3];
+          const firstPart = match[2];
+          const secondPart = match[3];
           
-          const formattedPhone = `(${ddd}) ${match[2]}-${match[3]}`;
-          const isWhatsApp = isWhatsAppNumber(fullPhone);
+          // Garantir formato consistente (XX) XXXXX-XXXX
+          let formattedPhone;
+          if (firstPart.length === 4) {
+            // Número antigo: adicionar 9 no início
+            formattedPhone = `(${ddd}) 9${firstPart}-${secondPart}`;
+          } else {
+            // Número já com 5 dígitos
+            formattedPhone = `(${ddd}) ${firstPart}-${secondPart}`;
+          }
+          
+          const isWhatsApp = isWhatsAppNumber(formattedPhone);
           
           console.log('Contato adicionado:', { businessName, formattedPhone, isWhatsApp });
           
@@ -108,14 +117,16 @@ const isWhatsAppNumber = (phone: string): boolean => {
   const numbers = phone.replace(/\D/g, '');
   
   // WhatsApp geralmente são números com 11 dígitos (DDD + 9 + 8 dígitos)
-  // ou 10 dígitos (DDD + 8 dígitos) para números mais antigos
   if (numbers.length === 11) {
     // Verifica se o terceiro dígito é 9 (celular)
     return numbers[2] === '9';
-  } else if (numbers.length === 10) {
-    // Números de 10 dígitos também podem ser WhatsApp (formato antigo)
-    return true;
   }
   
   return false;
+};
+
+// Função para converter telefone para formato internacional
+export const formatPhoneToInternational = (phone: string): string => {
+  const numbers = phone.replace(/\D/g, '');
+  return `+55${numbers}`;
 };

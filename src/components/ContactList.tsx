@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Building, Phone, MessageCircle, Copy, Download } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { formatPhoneToInternational } from '@/utils/parseContacts';
 
 interface Contact {
   name: string;
@@ -45,10 +46,8 @@ const ContactList = ({ contacts }: ContactListProps) => {
     });
   };
 
-  const formatAllContacts = () => {
-    return contacts.map(contact => 
-      `Nome da Empresa: ${contact.name}\nTelefone: ${contact.phone}\nTipo: ${contact.type}`
-    ).join('\n\n');
+  const formatAllContactsInternational = () => {
+    return contacts.map(contact => formatPhoneToInternational(contact.phone)).join('\n');
   };
 
   return (
@@ -63,7 +62,7 @@ const ContactList = ({ contacts }: ContactListProps) => {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => copyToClipboard(formatAllContacts())}
+              onClick={() => copyToClipboard(formatAllContactsInternational())}
               className="flex items-center gap-2"
             >
               <Copy className="h-4 w-4" />
