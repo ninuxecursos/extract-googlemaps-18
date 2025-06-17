@@ -21,7 +21,7 @@ const SeoContent = () => {
     <div className="bg-gray-800 text-gray-300 py-12 mt-16">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <Card className="bg-gradient-to-br from-blue-900/30 to-blue-800/20 border-blue-700/30 hover:border-blue-600/50 transition-all duration-300">
+          <Card className="bg-transparent border-blue-400 border-2 hover:border-blue-300 transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center mb-4">
                 <Users className="h-8 w-8 text-blue-400 mr-3" />
@@ -36,7 +36,7 @@ const SeoContent = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-900/30 to-green-800/20 border-green-700/30 hover:border-green-600/50 transition-all duration-300">
+          <Card className="bg-transparent border-green-400 border-2 hover:border-green-300 transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center mb-4">
                 <MessageCircle className="h-8 w-8 text-green-400 mr-3" />
@@ -51,7 +51,7 @@ const SeoContent = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-900/30 to-purple-800/20 border-purple-700/30 hover:border-purple-600/50 transition-all duration-300">
+          <Card className="bg-transparent border-purple-400 border-2 hover:border-purple-300 transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center mb-4">
                 <Link className="h-8 w-8 text-purple-400 mr-3" />
@@ -66,7 +66,7 @@ const SeoContent = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-yellow-900/30 to-yellow-800/20 border-yellow-700/30 hover:border-yellow-600/50 transition-all duration-300">
+          <Card className="bg-transparent border-yellow-400 border-2 hover:border-yellow-300 transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center mb-4">
                 <Gift className="h-8 w-8 text-yellow-400 mr-3" />
@@ -81,7 +81,7 @@ const SeoContent = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-red-900/30 to-red-800/20 border-red-700/30 hover:border-red-600/50 transition-all duration-300">
+          <Card className="bg-transparent border-red-400 border-2 hover:border-red-300 transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center mb-4">
                 <Target className="h-8 w-8 text-red-400 mr-3" />
@@ -96,7 +96,7 @@ const SeoContent = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-cyan-900/30 to-cyan-800/20 border-cyan-700/30 hover:border-cyan-600/50 transition-all duration-300">
+          <Card className="bg-transparent border-cyan-400 border-2 hover:border-cyan-300 transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center mb-4">
                 <Shield className="h-8 w-8 text-cyan-400 mr-3" />
