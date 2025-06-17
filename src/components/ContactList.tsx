@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Building, Phone, MessageCircle, Copy, Download } from 'lucide-react';
+import { Building, Phone, MessageCircle, Copy, Download, Link, Send } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formatPhoneToInternational } from '@/utils/parseContacts';
+import WhatsAppLinksModal from './WhatsAppLinksModal';
 
 interface Contact {
   name: string;
@@ -18,6 +19,8 @@ interface ContactListProps {
 }
 
 const ContactList = ({ contacts }: ContactListProps) => {
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
@@ -58,7 +61,7 @@ const ContactList = ({ contacts }: ContactListProps) => {
             <Building className="h-5 w-5" />
             Contatos Extraídos ({contacts.length})
           </CardTitle>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button 
               variant="outline" 
               size="sm"
@@ -67,6 +70,15 @@ const ContactList = ({ contacts }: ContactListProps) => {
             >
               <Copy className="h-4 w-4" />
               Copiar Todos
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowWhatsAppModal(true)}
+              className="flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+            >
+              <Link className="h-4 w-4" />
+              Links WhatsApp
             </Button>
             <Button 
               variant="outline" 
@@ -121,6 +133,12 @@ const ContactList = ({ contacts }: ContactListProps) => {
           ))}
         </div>
       </CardContent>
+
+      <WhatsAppLinksModal 
+        contacts={contacts}
+        isOpen={showWhatsAppModal}
+        onClose={() => setShowWhatsAppModal(false)}
+      />
     </Card>
   );
 };
