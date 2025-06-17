@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Copy, Heart, X, QrCode } from 'lucide-react';
+import { Copy, Heart } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import QRCode from 'qrcode';
 
 interface PixDonationModalProps {
   isOpen: boolean;
@@ -12,6 +13,27 @@ interface PixDonationModalProps {
 
 const PixDonationModal = ({ isOpen, onClose }: PixDonationModalProps) => {
   const pixKey = "3daa2ff7-400c-43e9-8205-ba51e9c9c2fb";
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
+
+  useEffect(() => {
+    if (isOpen) {
+      // Gerar QR Code quando o modal abrir
+      QRCode.toDataURL(pixKey, {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      })
+      .then((url) => {
+        setQrCodeUrl(url);
+      })
+      .catch((err) => {
+        console.error('Erro ao gerar QR Code:', err);
+      });
+    }
+  }, [isOpen, pixKey]);
 
   const copyPixKey = () => {
     navigator.clipboard.writeText(pixKey);
@@ -25,19 +47,10 @@ const PixDonationModal = ({ isOpen, onClose }: PixDonationModalProps) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-2">
-              <Heart className="h-5 w-5 text-red-500" />
-              Apoie este projeto
-            </DialogTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle className="flex items-center gap-2">
+            <Heart className="h-5 w-5 text-red-500" />
+            Apoie este projeto
+          </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6 text-center">
@@ -49,7 +62,17 @@ const PixDonationModal = ({ isOpen, onClose }: PixDonationModalProps) => {
 
           <div className="bg-gray-50 p-4 rounded-lg space-y-4">
             <div className="flex items-center justify-center">
-              <QrCode className="h-24 w-24 text-gray-400" />
+              {qrCodeUrl ? (
+                <img 
+                  src={qrCodeUrl} 
+                  alt="QR Code PIX" 
+                  className="w-48 h-48"
+                />
+              ) : (
+                <div className="w-48 h-48 bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500">Gerando QR Code...</span>
+                </div>
+              )}
             </div>
             <p className="text-xs text-gray-500">
               Escaneie o QR Code ou copie a chave PIX abaixo
